@@ -132,7 +132,7 @@
                 textColor: LAY.color("blue"),
                
             },
-            "next": {
+            "prev": {
 
                 props:{
                    
@@ -145,7 +145,7 @@
                     click: function prev() {
                         //console.log("prev button clicked");
                         console.log("prev button clicked -current is:" +  globalInfo.currentPage + "and totalpages are" +  globalInfo.totalPages);
-                        if (globalInfo.currentPage > 2)
+                        if (globalInfo.currentPage > 1)
                             theMovieDb.discover.getMovies({ "year": globalInfo.year, "page": globalInfo.currentPage - 1 }, successCB, errorCB);
                         
 
@@ -242,7 +242,7 @@
 
                 },
             },
-            "prev": {
+            "next": {
                 props:{
                     
                     left: LAY.take("/Header","width").minus(250),
