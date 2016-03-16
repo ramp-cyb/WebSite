@@ -107,6 +107,7 @@
             selectedMovie: [],
             currentPage: 0,
             totalPages: 0,
+            inputPlaceholder:""
 
         },
 
@@ -208,10 +209,12 @@
                         width: 200,
                         textPadding: 10,
                         textLineHeight: 1,
-                        inputPlaceholder: 'Movies by actor?',
+                        inputPlaceholder: "What actor's movies?",
+                        input: LAY.take("/", "data.inputPlaceholder"),
                         focus: true,
                         //left: LAY.take("../next", "width").add(350),
                         //text: "List movies from year..",
+                        //value:"Hello there",
                         border: { style: 'solid', width: 1, color: LAY.hex(0x999999) },
                         boxShadows: [
                           {
@@ -232,7 +235,21 @@
                                 var val = this.attr('$input').trim();
                                 globalInfo.keywords = val;
                                 console.log("Enter pressed.." + val);
-                                theMovieDb.discover.getMovies({ "with_keywords": globalInfo.keywords, }, successCB, errorCB);
+                                //theMovieDb.discover.getMovies({ "with_keywords": globalInfo.keywords, }, successCB, errorCB);
+                                theMovieDb.search.getPerson({ "query": val },
+                                    function (data) {
+                                        var actors = JSON.parse(data);
+                                        if(actors.results.length > 0)
+                                        {
+                                            console.log("selecting first actor from list..." + JSON.stringify(actors.results));
+                                            theMovieDb.discover.getMovies({ "with_people": actors.results[0].id }, successCB, errorCB);
+                                            LAY.level("/").data("inputPlaceholder", actors.results[0].name);
+
+                                        }
+                                    },
+                                    function (e) {
+                                        console.log("error in getting people" + e);
+                                    })
                             }
 
 
@@ -476,7 +493,7 @@
                         },
                         when: {
 
-                            click: function () {
+                            click: function gobackandclear() {
                                 LAY.level("/").data("reviews", false);
                                 LAY.level("/Reviews/heading").rowsCommit([]);
                                 LAY.level("/Reviews/casting/cast").rowsCommit([]);
@@ -572,10 +589,49 @@
                         },
                         "actor": {
                             props: {
-                                text: LAY.take("%s  AS  [%s]").format(LAY.take("../", "row.name"), LAY.take("../", "row.character")),
+                                text: LAY.take("../", "row.name"),
                                 left: LAY.take("../picture", "right").add(10),
-                            }
+                                textColor: LAY.color("blue"),
+                                cursor:"pointer"
+                            },
+                            when: {
+                                click: function () {
+                                    { //enter
+
+                                        var val = this.attr("text");
+                                        globalInfo.keywords = val;
+                                        console.log("Actor clicked.." + val);
+                                        //theMovieDb.discover.getMovies({ "with_keywords": globalInfo.keywords, }, successCB, errorCB);
+                                        theMovieDb.search.getPerson({ "query": val },
+                                            function (data) {
+                                                var actors = JSON.parse(data);
+                                                if (actors.results.length > 0) {
+                                                    console.log("selecting first actor from list..." + JSON.stringify(actors.results));
+                                                    theMovieDb.discover.getMovies({ "with_people": actors.results[0].id }, successCB, errorCB);
+                                                    LAY.level("/").data("inputPlaceholder", actors.results[0].name);
+                                                    
+                                                        LAY.level("/").data("reviews", false);
+                                                        LAY.level("/Reviews/heading").rowsCommit([]);
+                                                        LAY.level("/Reviews/casting/cast").rowsCommit([]);
+                                                        LAY.level("/Reviews").rowsCommit([]);
+
+                                                    
+                                                }
+                                            },
+                                            function (e) {
+                                                console.log("error in getting people" + e);
+                                            })
+                                    }
+                                }
+                            },
                         },
+                            "character": {
+                                props: {
+                                    left: LAY.take("../actor", "right").add(10),
+                                    text: LAY.take("AS [%s]").format(LAY.take("../", "row.character")),
+                                }
+                            },
+                        
 
 
                         many: {
