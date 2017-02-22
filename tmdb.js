@@ -1,4 +1,5 @@
 var theMovieDb = {};
+var myTempData =0;
 
 theMovieDb.common = {
     api_key: "YOUR_KEY",
